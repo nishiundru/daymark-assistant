@@ -13,6 +13,7 @@ import {
   PermissionSettings,
   TaskItem,
 } from '../types';
+import { analyzeCalendarRequest } from '../utils/assistantClient';
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -65,24 +66,14 @@ export function CalendarView({
     setErrorMsg(null);
     setIsAnalyzing(true);
     try {
-      const response = await fetch('/api/assistant/analyze-calendar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          events,
-          pendingAppointments,
-          focusGoal:
-            focusGoal.trim() ||
-            'Check my upcoming week for travel buffer risks, overlapping options, and the best free windows for errands.',
-          calendarPermission: permissions.calendar,
-        }),
+      const { analysis: a } = await analyzeCalendarRequest({
+        events,
+        pendingAppointments,
+        focusGoal:
+          focusGoal.trim() ||
+          'Check my upcoming week for travel buffer risks, overlapping options, and the best free windows for errands.',
+        calendarPermission: permissions.calendar,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not analyze calendar.');
-      }
-
-      const a = data.analysis;
       onUpdateAnalysis({
         briefSummary: a.briefSummary,
         analyzedAt: `Analyzed just now (${new Date().toLocaleTimeString([], {

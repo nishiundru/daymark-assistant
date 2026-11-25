@@ -6,6 +6,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: process.env.VITE_BASE_PATH || './',
     plugins: [
       react(),
       tailwindcss(),
@@ -24,6 +25,16 @@ export default defineConfig(() => {
           const distAssets = path.resolve(distDir, 'src/assets');
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+          }
+          // GitHub Pages SPA fallback & Jekyll bypass
+          const indexHtml = path.resolve(distDir, 'index.html');
+          const notFoundHtml = path.resolve(distDir, '404.html');
+          const noJekyll = path.resolve(distDir, '.nojekyll');
+          if (fs.existsSync(indexHtml)) {
+            fs.copyFileSync(indexHtml, notFoundHtml);
+          }
+          if (fs.existsSync(distDir)) {
+            fs.writeFileSync(noJekyll, '');
           }
         },
       },

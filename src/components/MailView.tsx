@@ -1,6 +1,7 @@
 import { ArrowRight, Loader2, Lock, Mail, Plus, Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { CalendarEvent, MailMessage, PermissionSettings, TaskItem } from '../types';
+import { CalendarEvent, MailMessage, PermissionSettings, TaskCategory, TaskItem } from '../types';
+import { analyzeMailRequest } from '../utils/assistantClient';
 
 interface MailViewProps {
   mails: MailMessage[];
@@ -79,28 +80,20 @@ export function MailView({
 
     setIsAnalyzing(true);
     try {
-      const response = await fetch('/api/assistant/analyze-mail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sender: rawSender.trim() || 'Forwarded message',
-          subject: rawSubject.trim() || 'Incoming item',
-          rawEmailText: rawBody.trim(),
-          calendarSummary,
-          emailPermission: permissions.email,
-        }),
+      const { analysis: a } = await analyzeMailRequest({
+        sender: rawSender.trim() || 'Forwarded message',
+        subject: rawSubject.trim() || 'Incoming item',
+        rawEmailText: rawBody.trim(),
+        calendarSummary,
+        emailPermission: permissions.email,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not analyze email.');
-      }
-
-      const a = data.analysis;
       const newTaskId = `task-mail-${Date.now()}`;
       const newMailId = `mail-${Date.now()}`;
 
-      const validCategories = ['refund', 'bill', 'appointment', 'form', 'subscription'];
-      const category = validCategories.includes(a.category) ? a.category : 'refund';
+      const validCategories: TaskCategory[] = ['refund', 'bill', 'appointment', 'form', 'subscription'];
+      const category: TaskCategory = validCategories.includes(a.category as TaskCategory)
+        ? (a.category as TaskCategory)
+        : 'refund';
 
       const newTask: TaskItem | null =
         permissions.email === 'read_only'
@@ -186,22 +179,13 @@ export function MailView({
     setErrorMsg(null);
     setIsRereading(true);
     try {
-      const response = await fetch('/api/assistant/analyze-mail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sender: `${selectedMail.fromName} <${selectedMail.fromAddress}>`,
-          subject: selectedMail.subject,
-          rawEmailText: selectedMail.rawBody,
-          calendarSummary,
-          emailPermission: permissions.email,
-        }),
+      const { analysis: a } = await analyzeMailRequest({
+        sender: `${selectedMail.fromName} <${selectedMail.fromAddress}>`,
+        subject: selectedMail.subject,
+        rawEmailText: selectedMail.rawBody,
+        calendarSummary,
+        emailPermission: permissions.email,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not re-read email.');
-      }
-      const a = data.analysis;
       onUpdateExistingMail(
         selectedMail.id,
         `${a.summary} (${a.anomalyOrOpportunity})`,

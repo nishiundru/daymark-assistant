@@ -21,6 +21,7 @@ import {
   TaskCategory,
   TaskItem,
 } from '../types';
+import { askAssistantRequest } from '../utils/assistantClient';
 import { formatCurrency, getCategoryLabel } from '../utils/storage';
 
 interface BriefingViewProps {
@@ -114,38 +115,28 @@ export function BriefingView({
     setAskError(null);
     setIsAsking(true);
     try {
-      const response = await fetch('/api/assistant/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requestText: promptText,
-          context: {
-            waitingTasks: waitingTasks.map((t) => ({
-              title: t.title,
-              counterparty: t.counterparty,
-              dueText: t.dueText,
-            })),
-            upcomingBills: bills,
-            calendarEvents: calendarEvents.map((ev) => ({
-              day: ev.dayLabel,
-              time: `${ev.startTime} - ${ev.endTime}`,
-              title: ev.title,
-            })),
-            recentMails: mails.slice(0, 4).map((m) => ({
-              from: m.fromName,
-              subject: m.subject,
-              observation: m.assistantObservation,
-            })),
-            permissions,
-          },
-        }),
+      const { result: res } = await askAssistantRequest({
+        requestText: promptText,
+        context: {
+          waitingTasks: waitingTasks.map((t) => ({
+            title: t.title,
+            counterparty: t.counterparty,
+            dueText: t.dueText,
+          })),
+          upcomingBills: bills,
+          calendarEvents: calendarEvents.map((ev) => ({
+            day: ev.dayLabel,
+            time: `${ev.startTime} - ${ev.endTime}`,
+            title: ev.title,
+          })),
+          recentMails: mails.slice(0, 4).map((m) => ({
+            from: m.fromName,
+            subject: m.subject,
+            observation: m.assistantObservation,
+          })),
+          permissions,
+        },
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not reach Daymark assistant.');
-      }
-
-      const res = data.result;
       let stagedTaskId: string | undefined;
       let stagedTaskTitle: string | undefined;
 
@@ -157,7 +148,7 @@ export function BriefingView({
           'form',
           'subscription',
         ];
-        const category = validCategories.includes(res.taskCategory)
+        const category = validCategories.includes(res.taskCategory as TaskCategory)
           ? (res.taskCategory as TaskCategory)
           : 'refund';
 
