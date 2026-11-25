@@ -1,0 +1,90 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: daymark-spruce · v2.0.0 */
+/* critique: warm-neutral stone canvas, deep spruce primary action, crisp 1px hairlines, tabular figures, zero decorative dots or nested cards */
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-paper: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0eee8;
+  --color-ink: #181816;
+  --color-ink-muted: #5b5a54;
+  --color-ink-subtle: #78766f;
+  --color-rule: #e4e1d8;
+  --color-rule-strong: #cfcbc0;
+  --color-accent: #1d5443;
+  --color-accent-hover: #154033;
+  --color-accent-soft: #eaf2ee;
+  --color-warn: #9a5b13;
+  --color-warn-soft: #fbf3e4;
+  --color-danger: #9f2c24;
+  --color-danger-soft: #faeae8;
+  --color-focus: #1d5443;
+}
+
+@layer base {
+  html {
+    scrollbar-color: var(--color-rule-strong) var(--color-paper);
+  }
+
+  html,
+  body {
+    overflow-x: clip;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  .font-mono-tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  button:not(:disabled):active {
+    transform: translateY(1px);
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    &:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

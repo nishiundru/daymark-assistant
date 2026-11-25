@@ -1,0 +1,6 @@
+{
+  "name": "Daymark",
+  "description": "A calm, trustworthy personal staff prototype for managing everyday mail, appointments, bills, refunds, and forms with explicit user approval.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
